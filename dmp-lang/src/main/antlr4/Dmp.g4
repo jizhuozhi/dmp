@@ -1,6 +1,6 @@
 grammar Dmp;
 
-program : expr;
+program : expr EOF;
 
 mapping : IDENT COLON expr;
 
@@ -11,13 +11,29 @@ string  : STRING;
 field   : DOT IDENT;
 object  : LBACKET mapping (COMMA mapping)* RBACKET;
 
-expr    : dot | number | bool | string | (field)+ | object;
+expr
+    : dot
+    | number
+    | bool
+    | string
+    | object
+    | projection;
+
+projection          : (IDENT | IDENT (field)+ | (field)+) (objectProjection | arrayProjection)?;
+arrow               : IDENT ARROW expr;
+objectProjection    : LPAREN arrow RPAREN;
+arrayProjection     : LBRACE arrow RBRACE;
 
 DOT     : '.';
 COLON   : ':';
 COMMA   : ',';
+LPAREN  : '(';
+RPAREN  : ')';
+LBRACE  : '[';
+RBRACE  : ']';
 LBACKET : '{';
 RBACKET : '}';
+ARROW   : '->';
 QUOTE   : '\'';
 DOUBLE_QUOTE : '"';
 

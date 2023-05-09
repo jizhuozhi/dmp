@@ -28,6 +28,21 @@ public enum Op {
     STORE_SLOT,
 
     /**
+     * {@literal LOAD_SYMBOL symbol, top+1}
+     */
+    LOAD_SYMBOL,
+
+    /**
+     * {@literal STORE_SYMBOL symbol, top-1}
+     */
+    STORE_SYMBOL,
+
+    /**
+     * {@literal REMOVE_SYMBOL symbol}
+     */
+    REMOVE_SYMBOL,
+
+    /**
      * {@literal PUSH literal, top+!}
      */
     PUSH,

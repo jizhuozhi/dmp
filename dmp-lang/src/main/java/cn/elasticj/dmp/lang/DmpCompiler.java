@@ -1,6 +1,7 @@
 package cn.elasticj.dmp.lang;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.Reader;
@@ -111,15 +112,51 @@ public class DmpCompiler {
                 return visitBool(ctx.bool());
             } else if (ctx.string() != null) {
                 return visitString(ctx.string());
-            } else if (ctx.field() != null && !ctx.field().isEmpty()) {
-                bytecodes.add(new Bytecode(Op.LOAD_ORIGIN));
-                for (DmpParser.FieldContext fieldContext : ctx.field()) {
-                    visitField(fieldContext);
-                }
-                return bytecodes;
+            } else if (ctx.projection() != null) {
+                return visitProjection(ctx.projection());
             } else if (ctx.object() != null) {
                 return visitObject(ctx.object());
             }
+            return bytecodes;
+        }
+
+        @Override
+        public List<Bytecode> visitProjection(DmpParser.ProjectionContext ctx) {
+            if (ctx.IDENT() != null) {
+                bytecodes.add(new Bytecode(Op.LOAD_SYMBOL, ctx.IDENT().getText()));
+            } else {
+                bytecodes.add(new Bytecode(Op.LOAD_ORIGIN));
+            }
+            if (ctx.field() != null && !ctx.field().isEmpty()) {
+                for (DmpParser.FieldContext fieldContext : ctx.field()) {
+                    visitField(fieldContext);
+                }
+            }
+            if (ctx.objectProjection() != null) {
+                return visitObjectProjection(ctx.objectProjection());
+            }
+            if (ctx.arrayProjection() != null) {
+                return visitArrayProjection(ctx.arrayProjection());
+            }
+            return bytecodes;
+        }
+
+        @Override
+        public List<Bytecode> visitObjectProjection(DmpParser.ObjectProjectionContext ctx) {
+            return visitArrow(ctx.arrow());
+        }
+
+        @Override
+        public List<Bytecode> visitArrayProjection(DmpParser.ArrayProjectionContext ctx) {
+            // TODO(jizhuozhi) unsupported
+            return super.visitArrayProjection(ctx);
+        }
+
+        @Override
+        public List<Bytecode> visitArrow(DmpParser.ArrowContext ctx) {
+            bytecodes.add(new Bytecode(Op.STORE_SYMBOL, ctx.IDENT().getText()));
+            visitExpr(ctx.expr());
+            bytecodes.add(new Bytecode(Op.REMOVE_SYMBOL, ctx.IDENT().getText()));
             return bytecodes;
         }
     }

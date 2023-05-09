@@ -1,7 +1,9 @@
 package cn.elasticj.dmp.lang;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DmpInterpreter {
 
@@ -22,6 +24,7 @@ public class DmpInterpreter {
         }
         StackFrame frame = new StackFrame(null, new Object[]{origin});
         List<Object> stack = new ArrayList<>();
+        Map<String, Object> symbols = new HashMap<>();
         int pc = 0;
 
         while (pc < bytecodes.length) {
@@ -55,6 +58,23 @@ public class DmpInterpreter {
                     int slot = (int) values[0];
                     Object top = stack.remove(stack.size() - 1);
                     frame.slots[slot] = top;
+                    break;
+                }
+                case LOAD_SYMBOL: {
+                    String symbol = (String) values[0];
+                    Object o = symbols.get(symbol);
+                    stack.add(o);
+                    break;
+                }
+                case STORE_SYMBOL: {
+                    String symbol = (String) values[0];
+                    Object o = stack.remove(stack.size() - 1);
+                    symbols.put(symbol, o);
+                    break;
+                }
+                case REMOVE_SYMBOL: {
+                    String symbol = (String) values[0];
+                    symbols.remove(symbol);
                     break;
                 }
                 case PUSH: {
