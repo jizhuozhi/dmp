@@ -13,7 +13,7 @@ class DmpCompilerTest {
     @Test
     void compile() {
         String script = "{ a: 1, b: 1.0, c: true, d: false, e: 'foobar', f: .foo.bar, g: ., h: { a: 123}, i: .foo(it -> it.bar), " +
-                "j: .foo(it -> it.bar(it1 -> { a: it, b: it1 })) }";
+                "j: .foo(it -> it.bar(it1 -> { a: it, b: it1 })), k: .foobar[it->{ a: it }] }";
         Bytecode[] expected = new Bytecode[]{
                 new Bytecode(Op.NEW),
                 new Bytecode(Op.FRAME_NEW, 1),
@@ -92,6 +92,39 @@ class DmpCompilerTest {
                 new Bytecode(Op.REMOVE_SYMBOL, "it1"),
                 new Bytecode(Op.REMOVE_SYMBOL, "it"),
                 new Bytecode(Op.PUT_FIELD, "j"),
+                new Bytecode(Op.LOAD_SLOT, 0),
+
+                new Bytecode(Op.LOAD_ORIGIN),
+                new Bytecode(Op.GET_FIELD, "foobar"),
+                new Bytecode(Op.ITERATOR_NEW),
+                new Bytecode(Op.ARRAY_NEW),
+                new Bytecode(Op.FRAME_NEW, 2),
+
+                new Bytecode(Op.LOAD_SLOT, 1),
+                new Bytecode(Op.ITERATOR_HAS_NEXT),
+                new Bytecode(Op.JUMP_FALSE, 84),
+
+                new Bytecode(Op.LOAD_SLOT, 0),
+
+                new Bytecode(Op.LOAD_SLOT, 1),
+                new Bytecode(Op.ITERATOR_NEXT),
+                new Bytecode(Op.STORE_SYMBOL, "it"),
+
+                new Bytecode(Op.NEW),
+                new Bytecode(Op.FRAME_NEW, 1),
+                new Bytecode(Op.LOAD_SLOT, 0),
+                new Bytecode(Op.LOAD_SYMBOL, "it"),
+                new Bytecode(Op.PUT_FIELD, "a"),
+                new Bytecode(Op.LOAD_SLOT, 0),
+                new Bytecode(Op.FRAME_RETURN),
+                new Bytecode(Op.REMOVE_SYMBOL, "it"),
+
+                new Bytecode(Op.ARRAY_PUSH),
+                new Bytecode(Op.JUMP, 67),
+                new Bytecode(Op.LOAD_SLOT, 0),
+                new Bytecode(Op.FRAME_RETURN),
+
+                new Bytecode(Op.PUT_FIELD, "k"),
                 new Bytecode(Op.LOAD_SLOT, 0),
 
                 new Bytecode(Op.FRAME_RETURN)

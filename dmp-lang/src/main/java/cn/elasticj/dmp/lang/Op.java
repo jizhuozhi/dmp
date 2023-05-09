@@ -43,7 +43,41 @@ public enum Op {
     REMOVE_SYMBOL,
 
     /**
-     * {@literal PUSH literal, top+!}
+     * {@literal ITERATOR_NEW}
+     */
+    ITERATOR_NEW,
+
+    /**
+     * {@literal ITERATOR_HAS_NEXT, top+1}
+     */
+    ITERATOR_HAS_NEXT,
+
+    /**
+     * {@literal ITERATOR_NEXT, top+1}
+     */
+    ITERATOR_NEXT,
+
+    /**
+     * {@literal JUMP pc}
+     */
+    JUMP,
+
+    /**
+     * {@literal JUMP_FALSE npc, top-1}
+     */
+    JUMP_FALSE,
+
+    /**
+     * {@literal ARRAY_NEW, top+1}
+     */
+    ARRAY_NEW,
+    /**
+     * {@literal ARRAY_PUSH, top-2}
+     */
+    ARRAY_PUSH,
+
+    /**
+     * {@literal PUSH literal, top+1}
      */
     PUSH,
 

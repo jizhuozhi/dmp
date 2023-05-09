@@ -1,9 +1,7 @@
 package cn.elasticj.dmp.lang;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class DmpInterpreter {
 
@@ -18,6 +16,7 @@ public class DmpInterpreter {
     }
 
 
+    @SuppressWarnings("unchecked")
     public Object run(Object origin, Bytecode... bytecodes) {
         if (bytecodes.length == 0) {
             return origin;
@@ -77,6 +76,51 @@ public class DmpInterpreter {
                     symbols.remove(symbol);
                     break;
                 }
+                case ITERATOR_NEW: {
+                    Object o = stack.remove(stack.size() - 1);
+                    Iterator<?> iterator;
+                    if (o.getClass().isArray()) {
+                        iterator = new ArrayIterator(o);
+                    } else if (o instanceof Iterable) {
+                        iterator = ((Iterable<?>) o).iterator();
+                    } else {
+                        throw new DmpException("Object is not iterable");
+                    }
+                    stack.add(iterator);
+                    break;
+                }
+                case ITERATOR_HAS_NEXT: {
+                    Iterator<?> iterator = (Iterator<?>) stack.remove(stack.size() - 1);
+                    stack.add(iterator.hasNext());
+                    break;
+                }
+                case ITERATOR_NEXT: {
+                    Iterator<?> iterator = (Iterator<?>) stack.remove(stack.size() - 1);
+                    stack.add(iterator.next());
+                    break;
+                }
+                case JUMP: {
+                    pc = (int) values[0];
+                    break;
+                }
+                case JUMP_FALSE: {
+                    boolean topValue = (boolean) stack.remove(stack.size() - 1);
+                    if (!topValue) {
+                        pc = (int) values[0];
+                    }
+                    break;
+                }
+                case ARRAY_NEW: {
+                    List<Object> array = new ArrayList<>();
+                    stack.add(array);
+                    break;
+                }
+                case ARRAY_PUSH: {
+                    Object top = stack.remove(stack.size() - 1);
+                    List<Object> top2 = (List<Object>) stack.remove(stack.size() - 1);
+                    top2.add(top);
+                    break;
+                }
                 case PUSH: {
                     stack.add(values[0]);
                     break;
@@ -123,6 +167,27 @@ public class DmpInterpreter {
         StackFrame(StackFrame parent, Object[] slots) {
             this.parent = parent;
             this.slots = slots;
+        }
+    }
+
+    static class ArrayIterator implements Iterator<Object> {
+
+        final Object o;
+
+        int position = 0;
+
+        ArrayIterator(Object o) {
+            this.o = o;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return position < Array.getLength(o);
+        }
+
+        @Override
+        public Object next() {
+            return Array.get(o, position++);
         }
     }
 }

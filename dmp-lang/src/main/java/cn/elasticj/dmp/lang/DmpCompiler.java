@@ -10,6 +10,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cn.elasticj.dmp.lang.Op.*;
+
 public class DmpCompiler {
 
     public DmpCompiler() {
@@ -40,13 +42,13 @@ public class DmpCompiler {
         public List<Bytecode> visitMapping(DmpParser.MappingContext ctx) {
             String ident = ctx.IDENT().getText();
             visitExpr(ctx.expr());
-            bytecodes.add(new Bytecode(Op.PUT_FIELD, ident));
+            bytecodes.add(new Bytecode(PUT_FIELD, ident));
             return bytecodes;
         }
 
         @Override
         public List<Bytecode> visitDot(DmpParser.DotContext ctx) {
-            bytecodes.add(new Bytecode(Op.LOAD_ORIGIN));
+            bytecodes.add(new Bytecode(LOAD_ORIGIN));
             return bytecodes;
         }
 
@@ -59,13 +61,13 @@ public class DmpCompiler {
             } else {
                 value = new BigDecimal(ctx.getText());
             }
-            bytecodes.add(new Bytecode(Op.PUSH, value));
+            bytecodes.add(new Bytecode(PUSH, value));
             return bytecodes;
         }
 
         @Override
         public List<Bytecode> visitBool(DmpParser.BoolContext ctx) {
-            bytecodes.add(new Bytecode(Op.PUSH, Boolean.valueOf(ctx.getText())));
+            bytecodes.add(new Bytecode(PUSH, Boolean.valueOf(ctx.getText())));
             return bytecodes;
         }
 
@@ -78,27 +80,27 @@ public class DmpCompiler {
                 string = string.replaceAll("\\\\\"", "\"");
             }
             string = string.substring(1, string.length() - 1);
-            bytecodes.add(new Bytecode(Op.PUSH, string));
+            bytecodes.add(new Bytecode(PUSH, string));
             return bytecodes;
         }
 
         @Override
         public List<Bytecode> visitField(DmpParser.FieldContext ctx) {
             String ident = ctx.IDENT().getText();
-            bytecodes.add(new Bytecode(Op.GET_FIELD, ident));
+            bytecodes.add(new Bytecode(GET_FIELD, ident));
             return bytecodes;
         }
 
         @Override
         public List<Bytecode> visitObject(DmpParser.ObjectContext ctx) {
-            bytecodes.add(new Bytecode(Op.NEW));
-            bytecodes.add(new Bytecode(Op.FRAME_NEW, 1));
+            bytecodes.add(new Bytecode(NEW));
+            bytecodes.add(new Bytecode(FRAME_NEW, 1));
             for (DmpParser.MappingContext mappingContext : ctx.mapping()) {
-                bytecodes.add(new Bytecode(Op.LOAD_SLOT, 0));
+                bytecodes.add(new Bytecode(LOAD_SLOT, 0));
                 visitMapping(mappingContext);
             }
-            bytecodes.add(new Bytecode(Op.LOAD_SLOT, 0));
-            bytecodes.add(new Bytecode(Op.FRAME_RETURN));
+            bytecodes.add(new Bytecode(LOAD_SLOT, 0));
+            bytecodes.add(new Bytecode(FRAME_RETURN));
             return bytecodes;
         }
 
@@ -123,9 +125,9 @@ public class DmpCompiler {
         @Override
         public List<Bytecode> visitProjection(DmpParser.ProjectionContext ctx) {
             if (ctx.IDENT() != null) {
-                bytecodes.add(new Bytecode(Op.LOAD_SYMBOL, ctx.IDENT().getText()));
+                bytecodes.add(new Bytecode(LOAD_SYMBOL, ctx.IDENT().getText()));
             } else {
-                bytecodes.add(new Bytecode(Op.LOAD_ORIGIN));
+                bytecodes.add(new Bytecode(LOAD_ORIGIN));
             }
             if (ctx.field() != null && !ctx.field().isEmpty()) {
                 for (DmpParser.FieldContext fieldContext : ctx.field()) {
@@ -148,15 +150,41 @@ public class DmpCompiler {
 
         @Override
         public List<Bytecode> visitArrayProjection(DmpParser.ArrayProjectionContext ctx) {
-            // TODO(jizhuozhi) unsupported
-            return super.visitArrayProjection(ctx);
+            bytecodes.add(new Bytecode(ITERATOR_NEW));
+            bytecodes.add(new Bytecode(ARRAY_NEW));
+            bytecodes.add(new Bytecode(FRAME_NEW, 2));
+
+            int iterateStart = bytecodes.size() - 1;
+
+            bytecodes.add(new Bytecode(LOAD_SLOT, 1));
+            bytecodes.add(new Bytecode(ITERATOR_HAS_NEXT));
+            Bytecode jumpFalse = new Bytecode(JUMP_FALSE, -1); // forward jump
+            bytecodes.add(jumpFalse);
+
+            bytecodes.add(new Bytecode(LOAD_SLOT, 0));
+
+            bytecodes.add(new Bytecode(LOAD_SLOT, 1));
+            bytecodes.add(new Bytecode(ITERATOR_NEXT));
+            visitArrow(ctx.arrow());
+
+            bytecodes.add(new Bytecode(ARRAY_PUSH));
+
+            bytecodes.add(new Bytecode(JUMP, iterateStart));
+
+            int iterateEnd = bytecodes.size() - 1;
+            jumpFalse.values()[0] = iterateEnd;
+
+            bytecodes.add(new Bytecode(LOAD_SLOT, 0));
+            bytecodes.add(new Bytecode(FRAME_RETURN));
+
+            return bytecodes;
         }
 
         @Override
         public List<Bytecode> visitArrow(DmpParser.ArrowContext ctx) {
-            bytecodes.add(new Bytecode(Op.STORE_SYMBOL, ctx.IDENT().getText()));
+            bytecodes.add(new Bytecode(STORE_SYMBOL, ctx.IDENT().getText()));
             visitExpr(ctx.expr());
-            bytecodes.add(new Bytecode(Op.REMOVE_SYMBOL, ctx.IDENT().getText()));
+            bytecodes.add(new Bytecode(REMOVE_SYMBOL, ctx.IDENT().getText()));
             return bytecodes;
         }
     }

@@ -19,7 +19,7 @@ public class Bytecode {
     }
 
     public Object[] values() {
-        return Arrays.copyOf(values, values.length);
+        return values;
     }
 
     @Override

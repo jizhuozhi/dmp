@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,12 +17,14 @@ class DmpInterpreterTest {
     @Test
     void run() {
         String script = "{ a: 1, b: 1.0, c: true, d: false, e: 'foobar', f: .foo.bar, g: ., h: { a: 123}, i: .foo(it -> it.bar), " +
-                "j: .foo(it -> it.bar(it1 -> { a: it, b: it1 })) }";
+                "j: .foo(it -> it.bar(it1 -> { a: it, b: it1 })), k: .foobar[it->{ a: it }] }";
         DmpCompiler compiler = new DmpCompiler();
         Bytecode[] bytecodes = compiler.compile(new StringReader(script));
 
         DmpInterpreter interpreter = new DmpInterpreter();
-        Map<String, ?> origin = singletonMap("foo", singletonMap("bar", 123));
+        Map<String, Object> origin = new HashMap<>();
+        origin.put("foo", singletonMap("bar", 123));
+        origin.put("foobar", new Object[]{1, 2, 3, 4});
         Object result = interpreter.run(origin, bytecodes);
 
         Map<String, Object> expected = new HashMap<>();
@@ -42,6 +45,8 @@ class DmpInterpreterTest {
         j.put("a", singletonMap("bar", 123));
         j.put("b", 123);
         expected.put("j", j);
+
+        expected.put("k", Arrays.asList(singletonMap("a", 1), singletonMap("a", 2), singletonMap("a", 3), singletonMap("a", 4)));
 
         assertThat(result).isEqualTo(expected);
     }
