@@ -26,19 +26,20 @@ class DmpInvocationHandlerTest {
 
         p.d = pp;
 
-        T.R r = t.invoke(p);
+        T.R r = t.invoke(p, 1, 2);
         assertThat(r.ra).isEqualTo(123);
         assertThat(r.rb).isEqualTo(456.789);
         assertThat(r.rc).isEqualTo("foobar");
         assertThat(r.rd).isEqualTo(pp);
         assertThat(r.rdb).isEqualTo(new BigDecimal("123.456"));
+        assertThat(r.sra).isEqualTo(1);
+        assertThat(r.srb).isEqualTo(2);
     }
-
 
     interface T {
 
-        @Dmp("{ra: .a, rb: .b, rc: .c, rd: .d, rdb: .d.b}")
-        R invoke(P p);
+        @Dmp("{ra: .a, rb: .b, rc: .c, rd: .d, rdb: .d.b, sra: a, srb: arg2}")
+        R invoke(@Origin P p, @Symbol("a") int a, int b);
 
         @Data
         class P {
@@ -51,6 +52,7 @@ class DmpInvocationHandlerTest {
             P d;
         }
 
+        @Data
         class R {
             int ra;
 
@@ -62,45 +64,9 @@ class DmpInvocationHandlerTest {
 
             BigDecimal rdb;
 
-            public int getRa() {
-                return ra;
-            }
+            int sra;
 
-            public void setRa(int ra) {
-                this.ra = ra;
-            }
-
-            public double getRb() {
-                return rb;
-            }
-
-            public void setRb(double rb) {
-                this.rb = rb;
-            }
-
-            public String getRc() {
-                return rc;
-            }
-
-            public void setRc(String rc) {
-                this.rc = rc;
-            }
-
-            public P getRd() {
-                return rd;
-            }
-
-            public void setRd(P rd) {
-                this.rd = rd;
-            }
-
-            public BigDecimal getRdb() {
-                return rdb;
-            }
-
-            public void setRdb(BigDecimal rdb) {
-                this.rdb = rdb;
-            }
+            int srb;
         }
     }
 }
