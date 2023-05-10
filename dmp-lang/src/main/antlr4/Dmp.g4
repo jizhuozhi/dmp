@@ -8,7 +8,7 @@ dot     : DOT;
 number  : NUMBER (DOT NUMBER)?;
 bool    : TRUE | FALSE;
 string  : STRING;
-field   : DOT IDENT;
+field   : DOT IDENT QUEST?;
 object  : LBACKET mapping (COMMA mapping)* RBACKET;
 
 expr
@@ -27,6 +27,7 @@ arrayProjection     : LBRACE arrow RBRACE;
 DOT     : '.';
 COLON   : ':';
 COMMA   : ',';
+QUEST   : '?';
 LPAREN  : '(';
 RPAREN  : ')';
 LBRACE  : '[';

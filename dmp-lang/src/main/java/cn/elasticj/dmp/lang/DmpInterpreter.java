@@ -103,6 +103,13 @@ public class DmpInterpreter {
                     }
                     break;
                 }
+                case JUMP_OPTIONAL: {
+                    Object o = stack.get(stack.size() - 1);
+                    if (o == null) {
+                        pc = (int) values[0];
+                    }
+                    break;
+                }
                 case ARRAY_NEW: {
                     List<Object> array = new ArrayList<>();
                     stack.add(array);

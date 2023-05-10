@@ -58,6 +58,11 @@ public enum Op {
     JUMP_FALSE,
 
     /**
+     * {@literal JUMP_OPTIONAL npc}
+     */
+    JUMP_OPTIONAL,
+
+    /**
      * {@literal ARRAY_NEW, top+1}
      */
     ARRAY_NEW,

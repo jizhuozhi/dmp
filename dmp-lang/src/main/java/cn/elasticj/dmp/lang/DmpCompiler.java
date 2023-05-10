@@ -132,16 +132,25 @@ public class DmpCompiler {
             } else {
                 bytecodes.add(new Bytecode(LOAD_ORIGIN));
             }
+            List<Bytecode> jumpNulls = new ArrayList<>();
             if (ctx.field() != null && !ctx.field().isEmpty()) {
                 for (DmpParser.FieldContext fieldContext : ctx.field()) {
                     visitField(fieldContext);
+                    if (fieldContext.QUEST() != null) {
+                        Bytecode jumpNull = new Bytecode(JUMP_OPTIONAL, -1);
+                        jumpNulls.add(jumpNull);
+                        bytecodes.add(jumpNull);
+                    }
                 }
             }
             if (ctx.objectProjection() != null) {
-                return visitObjectProjection(ctx.objectProjection());
+                visitObjectProjection(ctx.objectProjection());
+            } else if (ctx.arrayProjection() != null) {
+                visitArrayProjection(ctx.arrayProjection());
             }
-            if (ctx.arrayProjection() != null) {
-                return visitArrayProjection(ctx.arrayProjection());
+            int projectionEnd = bytecodes.size() - 1;
+            for (Bytecode jumpNull : jumpNulls) {
+                jumpNull.values()[0] = projectionEnd;
             }
             return bytecodes;
         }

@@ -51,4 +51,20 @@ class DmpInterpreterTest {
         assertThat(result).isEqualTo(expected);
     }
 
+    @Test
+    void runOptional() {
+        String script = ".a.b?.c";
+
+        DmpCompiler compiler = new DmpCompiler();
+        DmpDefinition definition = compiler.compile(new StringReader(script));
+
+        DmpInterpreter interpreter = new DmpInterpreter();
+        Map<String, Object> origin = singletonMap("a", singletonMap("b", null));
+        Object result = interpreter.run(definition, origin);
+        assertThat(result).isNull();
+
+        origin = singletonMap("a", singletonMap("b", singletonMap("c", 123)));
+        result = interpreter.run(definition, origin);
+        assertThat(result).isEqualTo(123);
+    }
 }
