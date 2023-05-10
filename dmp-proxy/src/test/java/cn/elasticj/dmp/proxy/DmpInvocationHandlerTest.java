@@ -1,5 +1,8 @@
 package cn.elasticj.dmp.proxy;
 
+import cn.elasticj.dmp.proxy.annotation.Dmp;
+import cn.elasticj.dmp.proxy.annotation.Origin;
+import cn.elasticj.dmp.proxy.annotation.Symbol;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import org.junit.jupiter.api.Test;

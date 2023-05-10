@@ -1,4 +1,4 @@
-package cn.elasticj.dmp.proxy;
+package cn.elasticj.dmp.proxy.annotation;
 
 import java.lang.annotation.*;
 
