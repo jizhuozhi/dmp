@@ -1,7 +1,7 @@
 package cn.elasticj.dmp.fastjson;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import cn.elasticj.dmp.proxy.ObjectConverter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JacksonObjectConverter implements ObjectConverter {
 
@@ -18,7 +18,7 @@ public class JacksonObjectConverter implements ObjectConverter {
     }
 
     @Override
-    public Object convert(Object o, Class<?> clazz) {
+    public <T> T convert(Object o, Class<T> clazz) {
         return objectMapper.convertValue(o, clazz);
     }
 }

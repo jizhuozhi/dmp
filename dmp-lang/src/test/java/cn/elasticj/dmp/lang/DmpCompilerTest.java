@@ -16,7 +16,7 @@ class DmpCompilerTest {
                 "j: .foo(it -> it.bar(it1 -> { a: it, b: it1 })), k: .foobar[it->{ a: it }] }";
         Bytecode[] expected = new Bytecode[]{
                 new Bytecode(Op.NEW),
-                new Bytecode(Op.FRAME_NEW, 1),
+                new Bytecode(Op.STORE_SLOT, 0),
 
                 new Bytecode(Op.LOAD_SLOT, 0),
                 new Bytecode(Op.PUSH, BigInteger.ONE),
@@ -51,14 +51,13 @@ class DmpCompilerTest {
                 new Bytecode(Op.LOAD_SLOT, 0),
 
                 new Bytecode(Op.NEW),
-                new Bytecode(Op.FRAME_NEW, 1),
+                new Bytecode(Op.STORE_SLOT, 1),
 
-                new Bytecode(Op.LOAD_SLOT, 0),
+                new Bytecode(Op.LOAD_SLOT, 1),
                 new Bytecode(Op.PUSH, BigInteger.valueOf(123)),
                 new Bytecode(Op.PUT_FIELD, "a"),
 
-                new Bytecode(Op.LOAD_SLOT, 0),
-                new Bytecode(Op.FRAME_RETURN),
+                new Bytecode(Op.LOAD_SLOT, 1),
 
                 new Bytecode(Op.PUT_FIELD, "h"),
 
@@ -79,60 +78,59 @@ class DmpCompilerTest {
                 new Bytecode(Op.LOAD_SYMBOL, "it"),
                 new Bytecode(Op.GET_FIELD, "bar"),
                 new Bytecode(Op.STORE_SYMBOL, "it1"),
+
                 new Bytecode(Op.NEW),
-                new Bytecode(Op.FRAME_NEW, 1),
-                new Bytecode(Op.LOAD_SLOT, 0),
+                new Bytecode(Op.STORE_SLOT, 2),
+                new Bytecode(Op.LOAD_SLOT, 2),
                 new Bytecode(Op.LOAD_SYMBOL, "it"),
                 new Bytecode(Op.PUT_FIELD, "a"),
-                new Bytecode(Op.LOAD_SLOT, 0),
+                new Bytecode(Op.LOAD_SLOT, 2),
                 new Bytecode(Op.LOAD_SYMBOL, "it1"),
                 new Bytecode(Op.PUT_FIELD, "b"),
-                new Bytecode(Op.LOAD_SLOT, 0),
-                new Bytecode(Op.FRAME_RETURN),
+                new Bytecode(Op.LOAD_SLOT, 2),
                 new Bytecode(Op.REMOVE_SYMBOL, "it1"),
                 new Bytecode(Op.REMOVE_SYMBOL, "it"),
                 new Bytecode(Op.PUT_FIELD, "j"),
+
                 new Bytecode(Op.LOAD_SLOT, 0),
 
                 new Bytecode(Op.LOAD_ORIGIN),
                 new Bytecode(Op.GET_FIELD, "foobar"),
                 new Bytecode(Op.ITERATOR_NEW),
+                new Bytecode(Op.STORE_SLOT, 3),
+
                 new Bytecode(Op.ARRAY_NEW),
-                new Bytecode(Op.FRAME_NEW, 2),
+                new Bytecode(Op.STORE_SLOT, 4),
 
-                new Bytecode(Op.LOAD_SLOT, 1),
+                new Bytecode(Op.LOAD_SLOT, 3),
                 new Bytecode(Op.ITERATOR_HAS_NEXT),
-                new Bytecode(Op.JUMP_FALSE, 84),
+                new Bytecode(Op.JUMP_FALSE, 82),
 
-                new Bytecode(Op.LOAD_SLOT, 0),
+                new Bytecode(Op.LOAD_SLOT, 4),
 
-                new Bytecode(Op.LOAD_SLOT, 1),
+                new Bytecode(Op.LOAD_SLOT, 3),
                 new Bytecode(Op.ITERATOR_NEXT),
                 new Bytecode(Op.STORE_SYMBOL, "it"),
 
                 new Bytecode(Op.NEW),
-                new Bytecode(Op.FRAME_NEW, 1),
-                new Bytecode(Op.LOAD_SLOT, 0),
+                new Bytecode(Op.STORE_SLOT, 5),
+                new Bytecode(Op.LOAD_SLOT, 5),
                 new Bytecode(Op.LOAD_SYMBOL, "it"),
                 new Bytecode(Op.PUT_FIELD, "a"),
-                new Bytecode(Op.LOAD_SLOT, 0),
-                new Bytecode(Op.FRAME_RETURN),
+                new Bytecode(Op.LOAD_SLOT, 5),
                 new Bytecode(Op.REMOVE_SYMBOL, "it"),
 
                 new Bytecode(Op.ARRAY_PUSH),
-                new Bytecode(Op.JUMP, 67),
-                new Bytecode(Op.LOAD_SLOT, 0),
-                new Bytecode(Op.FRAME_RETURN),
+                new Bytecode(Op.JUMP, 66),
+                new Bytecode(Op.LOAD_SLOT, 4),
 
                 new Bytecode(Op.PUT_FIELD, "k"),
                 new Bytecode(Op.LOAD_SLOT, 0),
-
-                new Bytecode(Op.FRAME_RETURN)
         };
 
         DmpCompiler compiler = new DmpCompiler();
-        Bytecode[] bytecodes = compiler.compile(new StringReader(script));
+        DmpDefinition definition = compiler.compile(new StringReader(script));
 
-        assertThat(bytecodes).isEqualTo(expected);
+        assertThat(definition.bytecodes).isEqualTo(expected);
     }
 }

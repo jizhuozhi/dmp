@@ -1,12 +1,12 @@
 package cn.elasticj.dmp.fastjson;
 
+import cn.elasticj.dmp.proxy.ObjectConverter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import cn.elasticj.dmp.proxy.ObjectConverter;
 
 public class FastjsonObjectConverter implements ObjectConverter {
     @Override
-    public Object convert(Object o, Class<?> clazz) {
+    public <T> T convert(Object o, Class<T> clazz) {
         return JSONObject.parseObject(JSON.toJSONString(o), clazz);
     }
 }

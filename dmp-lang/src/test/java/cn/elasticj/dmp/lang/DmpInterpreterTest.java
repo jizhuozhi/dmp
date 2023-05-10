@@ -19,13 +19,13 @@ class DmpInterpreterTest {
         String script = "{ a: 1, b: 1.0, c: true, d: false, e: 'foobar', f: .foo.bar, g: ., h: { a: 123}, i: .foo(it -> it.bar), " +
                 "j: .foo(it -> it.bar(it1 -> { a: it, b: it1 })), k: .foobar[it->{ a: it }] }";
         DmpCompiler compiler = new DmpCompiler();
-        Bytecode[] bytecodes = compiler.compile(new StringReader(script));
+        DmpDefinition definition = compiler.compile(new StringReader(script));
 
         DmpInterpreter interpreter = new DmpInterpreter();
         Map<String, Object> origin = new HashMap<>();
         origin.put("foo", singletonMap("bar", 123));
         origin.put("foobar", new Object[]{1, 2, 3, 4});
-        Object result = interpreter.run(origin, bytecodes);
+        Object result = interpreter.run(definition, origin);
 
         Map<String, Object> expected = new HashMap<>();
         expected.put("a", BigInteger.ONE);

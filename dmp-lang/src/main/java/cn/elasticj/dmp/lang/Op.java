@@ -3,16 +3,6 @@ package cn.elasticj.dmp.lang;
 public enum Op {
 
     /**
-     * {@literal FRAME_NEW stacks, top-#stacks}
-     */
-    FRAME_NEW,
-
-    /**
-     * {@literal FRAME_RETURN}
-     */
-    FRAME_RETURN,
-
-    /**
      * {@literal LOAD_ORIGIN, top+1}
      */
     LOAD_ORIGIN,

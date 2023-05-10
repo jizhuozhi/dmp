@@ -15,13 +15,15 @@ public class DmpInterpreter {
         this.objectHolderRegistry = objectHolderRegistry;
     }
 
-
     @SuppressWarnings("unchecked")
-    public Object run(Object origin, Bytecode... bytecodes) {
+    public Object run(DmpDefinition definition, Object origin) {
+        Bytecode[] bytecodes = definition.bytecodes;
         if (bytecodes.length == 0) {
             return origin;
         }
-        StackFrame frame = new StackFrame(null, new Object[]{origin});
+
+        // runtime structures
+        Object[] slots = new Object[definition.slots];
         List<Object> stack = new ArrayList<>();
         Map<String, Object> symbols = new HashMap<>();
         int pc = 0;
@@ -31,32 +33,20 @@ public class DmpInterpreter {
             Op op = bytecode.op();
             Object[] values = bytecode.values();
             switch (op) {
-                case FRAME_NEW: {
-                    Object[] slots = new Object[(int) values[0]];
-                    for (int i = 0; i < slots.length; i++) {
-                        slots[i] = stack.remove(stack.size() - 1);
-                    }
-                    frame = new StackFrame(frame, slots);
-                    break;
-                }
-                case FRAME_RETURN: {
-                    frame = frame.parent;
-                    break;
-                }
                 case LOAD_ORIGIN: {
                     stack.add(origin);
                     break;
                 }
                 case LOAD_SLOT: {
                     int slot = (int) values[0];
-                    Object o = frame.slots[slot];
+                    Object o = slots[slot];
                     stack.add(o);
                     break;
                 }
                 case STORE_SLOT: {
                     int slot = (int) values[0];
                     Object top = stack.remove(stack.size() - 1);
-                    frame.slots[slot] = top;
+                    slots[slot] = top;
                     break;
                 }
                 case LOAD_SYMBOL: {
@@ -150,7 +140,8 @@ public class DmpInterpreter {
             }
             pc++;
         }
-        return stack.get(stack.size() - 1);
+        assert stack.size() == 1;
+        return stack.get(0);
     }
 
     private ObjectHolder getHolder(Object o) {
@@ -158,16 +149,6 @@ public class DmpInterpreter {
             return objectHolderRegistry.get(Object.class);
         }
         return objectHolderRegistry.get(o.getClass());
-    }
-
-    static class StackFrame {
-        final StackFrame parent;
-        final Object[] slots;
-
-        StackFrame(StackFrame parent, Object[] slots) {
-            this.parent = parent;
-            this.slots = slots;
-        }
     }
 
     static class ArrayIterator implements Iterator<Object> {

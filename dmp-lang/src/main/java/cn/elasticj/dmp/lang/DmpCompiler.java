@@ -17,13 +17,14 @@ public class DmpCompiler {
     public DmpCompiler() {
     }
 
-    public Bytecode[] compile(Reader reader) {
+    public DmpDefinition compile(Reader reader) {
         try {
             DmpLexer lexer = new DmpLexer(CharStreams.fromReader(reader));
             DmpParser parser = new DmpParser(new CommonTokenStream(lexer));
             Visitor visitor = new Visitor();
             visitor.visitProgram(parser.program());
-            return visitor.bytecodes.toArray(new Bytecode[0]);
+
+            return new DmpDefinition(visitor.slots, visitor.bytecodes.toArray(new Bytecode[0]));
         } catch (Throwable t) {
             throw new DmpException(t);
         }
@@ -32,6 +33,8 @@ public class DmpCompiler {
     private static final class Visitor extends DmpBaseVisitor<List<Bytecode>> {
 
         private final List<Bytecode> bytecodes = new ArrayList<>();
+
+        private int slots = 0;
 
         @Override
         public List<Bytecode> visitProgram(DmpParser.ProgramContext ctx) {
@@ -93,14 +96,14 @@ public class DmpCompiler {
 
         @Override
         public List<Bytecode> visitObject(DmpParser.ObjectContext ctx) {
+            int objectSlot = nextSlot();
             bytecodes.add(new Bytecode(NEW));
-            bytecodes.add(new Bytecode(FRAME_NEW, 1));
+            bytecodes.add(new Bytecode(STORE_SLOT, objectSlot));
             for (DmpParser.MappingContext mappingContext : ctx.mapping()) {
-                bytecodes.add(new Bytecode(LOAD_SLOT, 0));
+                bytecodes.add(new Bytecode(LOAD_SLOT, objectSlot));
                 visitMapping(mappingContext);
             }
-            bytecodes.add(new Bytecode(LOAD_SLOT, 0));
-            bytecodes.add(new Bytecode(FRAME_RETURN));
+            bytecodes.add(new Bytecode(LOAD_SLOT, objectSlot));
             return bytecodes;
         }
 
@@ -150,32 +153,41 @@ public class DmpCompiler {
 
         @Override
         public List<Bytecode> visitArrayProjection(DmpParser.ArrayProjectionContext ctx) {
+            int iteratorSlot = nextSlot();
             bytecodes.add(new Bytecode(ITERATOR_NEW));
+            bytecodes.add(new Bytecode(STORE_SLOT, iteratorSlot));
+
+            int arraySlot = nextSlot();
             bytecodes.add(new Bytecode(ARRAY_NEW));
-            bytecodes.add(new Bytecode(FRAME_NEW, 2));
+            bytecodes.add(new Bytecode(STORE_SLOT, arraySlot));
 
             int iterateStart = bytecodes.size() - 1;
 
-            bytecodes.add(new Bytecode(LOAD_SLOT, 1));
+            // while (iterator.hasNext())
+            bytecodes.add(new Bytecode(LOAD_SLOT, iteratorSlot));
             bytecodes.add(new Bytecode(ITERATOR_HAS_NEXT));
             Bytecode jumpFalse = new Bytecode(JUMP_FALSE, -1); // forward jump
             bytecodes.add(jumpFalse);
 
-            bytecodes.add(new Bytecode(LOAD_SLOT, 0));
+            bytecodes.add(new Bytecode(LOAD_SLOT, arraySlot));
 
-            bytecodes.add(new Bytecode(LOAD_SLOT, 1));
+            // Object it = iterator.next();
+            bytecodes.add(new Bytecode(LOAD_SLOT, iteratorSlot));
             bytecodes.add(new Bytecode(ITERATOR_NEXT));
+
+            // Object result = { it -> ... }
             visitArrow(ctx.arrow());
 
+            // array.add(result)
             bytecodes.add(new Bytecode(ARRAY_PUSH));
 
+            // next iteration
             bytecodes.add(new Bytecode(JUMP, iterateStart));
 
             int iterateEnd = bytecodes.size() - 1;
             jumpFalse.values()[0] = iterateEnd;
 
-            bytecodes.add(new Bytecode(LOAD_SLOT, 0));
-            bytecodes.add(new Bytecode(FRAME_RETURN));
+            bytecodes.add(new Bytecode(LOAD_SLOT, arraySlot));
 
             return bytecodes;
         }
@@ -186,6 +198,10 @@ public class DmpCompiler {
             visitExpr(ctx.expr());
             bytecodes.add(new Bytecode(REMOVE_SYMBOL, ctx.IDENT().getText()));
             return bytecodes;
+        }
+
+        private int nextSlot() {
+            return slots++;
         }
     }
 }

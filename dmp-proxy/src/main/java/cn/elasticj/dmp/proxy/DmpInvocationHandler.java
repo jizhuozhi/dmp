@@ -1,7 +1,7 @@
 package cn.elasticj.dmp.proxy;
 
-import cn.elasticj.dmp.lang.Bytecode;
 import cn.elasticj.dmp.lang.DmpCompiler;
+import cn.elasticj.dmp.lang.DmpDefinition;
 import cn.elasticj.dmp.lang.DmpInterpreter;
 
 import java.io.StringReader;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class DmpInvocationHandler implements InvocationHandler {
 
-    private final Map<Method, Bytecode[]> cache = new HashMap<>();
+    private final Map<Method, DmpDefinition> cache = new HashMap<>();
 
     private final DmpCompiler compiler = new DmpCompiler();
 
@@ -25,13 +25,13 @@ public class DmpInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
-        Bytecode[] bytecodes = cache.get(method);
+        DmpDefinition definition = cache.get(method);
         DmpInterpreter interpreter = new DmpInterpreter();
         Object result;
         if (args.length == 1) {
-            result = interpreter.run(args[0], bytecodes);
+            result = interpreter.run(definition, args[0]);
         } else {
-            result = interpreter.run(null, bytecodes);
+            result = interpreter.run(definition, null);
         }
 
         return objectConverter.convert(result, method.getReturnType());
@@ -43,7 +43,7 @@ public class DmpInvocationHandler implements InvocationHandler {
         }
 
         Method[] methods = clazz.getDeclaredMethods();
-        Map<String, Bytecode[]> scanningCache = new HashMap<>();
+        Map<String, DmpDefinition> scanningCache = new HashMap<>();
 
         for (Method method : methods) {
             if (method.isDefault()) {
@@ -64,8 +64,8 @@ public class DmpInvocationHandler implements InvocationHandler {
             }
 
             String script = dmp.value();
-            Bytecode[] bytecodes = scanningCache.computeIfAbsent(script, s -> compiler.compile(new StringReader(s)));
-            cache.put(method, bytecodes);
+            DmpDefinition definition = scanningCache.computeIfAbsent(script, s -> compiler.compile(new StringReader(s)));
+            cache.put(method, definition);
         }
     }
 }
