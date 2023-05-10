@@ -89,7 +89,7 @@ public class DmpInvocationHandler implements InvocationHandler {
                 if (symbol != null) {
                     parameterSymbols[i] = symbol.value();
                 } else {
-                    parameterSymbols[i] = parameter.getName();
+                    parameterSymbols[i] = "arg" + i;
                 }
 
                 if (parameter.isAnnotationPresent(Origin.class)) {
