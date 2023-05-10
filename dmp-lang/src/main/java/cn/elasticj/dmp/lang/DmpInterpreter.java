@@ -15,8 +15,12 @@ public class DmpInterpreter {
         this.objectHolderRegistry = objectHolderRegistry;
     }
 
-    @SuppressWarnings("unchecked")
     public Object run(DmpDefinition definition, Object origin) {
+        return run(definition, origin, new HashMap<>());
+    }
+
+    @SuppressWarnings("unchecked")
+    public Object run(DmpDefinition definition, Object origin, Map<String, Object> symbols) {
         Bytecode[] bytecodes = definition.bytecodes;
         if (bytecodes.length == 0) {
             return origin;
@@ -25,7 +29,6 @@ public class DmpInterpreter {
         // runtime structures
         Object[] slots = new Object[definition.slots];
         List<Object> stack = new ArrayList<>();
-        Map<String, Object> symbols = new HashMap<>();
         int pc = 0;
 
         while (pc < bytecodes.length) {
