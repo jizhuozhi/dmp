@@ -71,14 +71,7 @@ public class DmpInterpreter {
                 }
                 case ITERATOR_NEW: {
                     Object o = stack.remove(stack.size() - 1);
-                    Iterator<?> iterator;
-                    if (o.getClass().isArray()) {
-                        iterator = new ArrayIterator(o);
-                    } else if (o instanceof Iterable) {
-                        iterator = ((Iterable<?>) o).iterator();
-                    } else {
-                        throw new DmpException("Object is not iterable");
-                    }
+                    Iterator<?> iterator = new DmpIterator(o);
                     stack.add(iterator);
                     break;
                 }
@@ -159,26 +152,5 @@ public class DmpInterpreter {
             return objectHolderRegistry.get(Object.class);
         }
         return objectHolderRegistry.get(o.getClass());
-    }
-
-    static class ArrayIterator implements Iterator<Object> {
-
-        final Object o;
-
-        int position = 0;
-
-        ArrayIterator(Object o) {
-            this.o = o;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return position < Array.getLength(o);
-        }
-
-        @Override
-        public Object next() {
-            return Array.get(o, position++);
-        }
     }
 }
