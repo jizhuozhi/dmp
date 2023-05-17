@@ -23,3 +23,5 @@ All data type literals, and
   3. optional field path(`foobar?.foo?.bar`): as `foobar.foo.bar` but loads `null` if symbol `foobar` or field `foo` is not exists
   4. object projection(`.foobar.foo(foo -> foo.bar)`): as `.foobar.foo`, but binds value to symbol `foo`, then executes projection `{bar: foo.bar}`. In this example, it's as same as `.foobar.foo.bar`, but `foo.bar` could be any valid expression.
   5. array projection(`.foobar.foo[foo -> foo.bar]`): as `.foobar.foo`, but binds each items in array to symbol `foo`, loads `bar` from each item `foo`, and then pushes to new array.
+
+DMP **has no plan** to support any other operators and function call, DMP **is just a** data mapping processor, but not a GPPL (general purpose program language).
