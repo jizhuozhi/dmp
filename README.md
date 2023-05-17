@@ -43,6 +43,8 @@ DMP **has no plan** to support any other operators and function call, DMP **is j
   },
   h: .a.b.c,
   i: .a.b.foo(it -> {foo: it.foo, bar: it.bar}),
-  j: .a.b.bar[it -> {foo: it.foo, bar: it.bar}]
+  j: .a.b.bar[it -> {foo: it.foo, bar: it.bar}],
+  k: .a.b?.c,
+  l: foobar.foo.bar
 }
 ```
