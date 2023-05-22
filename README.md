@@ -24,6 +24,8 @@ All data type literals, and
   4. object projection(`.foobar.foo(foo -> foo.bar)`): as `.foobar.foo`, but binds value to symbol `foo`, then executes projection `{bar: foo.bar}`. In this example, it's as same as `.foobar.foo.bar`, but `foo.bar` could be any valid expression.
   5. array projection(`.foobar.foo[foo -> foo.bar]`): as `.foobar.foo`, but binds each items in array to symbol `foo`, loads `bar` from each item `foo`, and then pushes to new array.
 
+Because DMP doesn't implement symbol scoping, the symbol for each mapping binding should be unique within the current scope (`it -> ...`), otherwise it will be overwritten.
+
 DMP **has no plan** to support any other operators and function call, DMP **is just a** data mapping processor, but neither a GPPL (general purpose program language) , nor expression language, nor script language.
 
 ## Example
