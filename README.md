@@ -58,7 +58,7 @@ DMP provides a strong type resolution
 ```Java
 public interface User2PeopleMapper {
 
-    @Dmp("{id: .userId, name: .username, nichname: .nickname, age: .age, friendNames: .friends[it->it.name]}")
+    @Dmp("{id: .userId, name: .username, nichname: .nickname, age: .age, friendNames: .friends[it->it?.name]}")
     People map(@Origin User user);
     
     class User {
