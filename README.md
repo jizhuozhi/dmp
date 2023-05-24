@@ -90,7 +90,7 @@ public interface User2PeopleMapper {
 }
 
 User2PeopleMapper mapper = DmpProxy.newInstance(User2PeopleMapper.class, OBJECT_MAPPER::convertValue);
-People people = mapper.nap(user);
+People people = mapper.map(user);
 ```
 
 
