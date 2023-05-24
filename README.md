@@ -50,3 +50,47 @@ DMP **has no plan** to support any other operators and function call, DMP **is j
   l: foobar.foo.bar
 }
 ```
+
+## JDK Proxy
+
+DMP provides a strong type resolution
+
+```Java
+public interface User2PeopleMapper {
+
+    @Dmp("{id: .userId, name: .username, nichname: .nickname, age: .age, friendNames: .friends[it->it.name]}")
+    People map(@Origin User user);
+    
+    class User {
+        private Long userId;
+        private String username;
+        private String nickname;
+        private Short age;
+        private List<User> friends;
+        // getters/setters
+    }
+    
+    class User {
+        private Long userId;
+        private String username;
+        private String nickname;
+        private Short age;
+        private List<User> friends;
+        // getters/setters
+    }
+    
+    class People {
+        private Long id;
+        private String name;
+        private String nickname;
+        private Short age;
+        private List<String> friendNames;
+        // getters/setters
+    }
+}
+
+User2PeopleMapper mapper = DmpProxy.newInstance(User2PeopleMapper.class, OBJECT_MAPPER::convertValue);
+People people = mapper.nap(user);
+```
+
+
