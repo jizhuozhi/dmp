@@ -93,4 +93,4 @@ User2PeopleMapper mapper = DmpProxy.newInstance(User2PeopleMapper.class, OBJECT_
 People people = mapper.map(user);
 ```
 
-
+There is no naming conventions requirement here, the only requirement is all methods must be annotated with @DMP with script, the object meets the POJO requirements.
