@@ -70,15 +70,6 @@ public interface User2PeopleMapper {
         // getters/setters
     }
     
-    class User {
-        private Long userId;
-        private String username;
-        private String nickname;
-        private Short age;
-        private List<User> friends;
-        // getters/setters
-    }
-    
     class People {
         private Long id;
         private String name;
